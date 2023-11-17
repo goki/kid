@@ -11,6 +11,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -25,6 +26,10 @@ import (
 // the user information, which are typically obtained through a developer oauth
 // portal (eg: the Credentials section of https://console.developers.google.com/).
 func Auth(ctx context.Context, providerName, providerURL, clientID, clientSecret string) (*oauth2.Token, *oidc.UserInfo, error) {
+	if clientID == "" || clientSecret == "" {
+		slog.Warn("got empty client id or client secret; do you need to set env variables?")
+	}
+
 	provider, err := oidc.NewProvider(ctx, providerURL)
 	if err != nil {
 		return nil, nil, err
