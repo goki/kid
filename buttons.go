@@ -30,7 +30,7 @@ func init() {
 // buttons for major platforms. It calls the given function with the resulting
 // oauth token and user info when the user successfully authenticates.
 func Buttons(par gi.Widget, fun func(token *oauth2.Token, userInfo *oidc.UserInfo)) *gi.Layout {
-	ly := gi.NewLayout(par)
+	ly := gi.NewLayout(par, "auth-buttons")
 	ly.Style(func(s *styles.Style) {
 		s.MainAxis = mat32.Y
 	})
