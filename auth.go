@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package kid (Ki ID) provides a system for identifying and authenticating
+// users through third party cloud systems in GoKi apps.
 package kid
 
 import (
@@ -19,7 +21,10 @@ import (
 // Auth authenticates the user with the given provider and returns the
 // resulting oauth token and user info. The provider is specified in terms
 // of its name (eg: "google") and its URL (eg: "https://accounts.google.com").
-func Auth(ctx context.Context, providerName string, providerURL string) (*oauth2.Token, *oidc.UserInfo, error) {
+// Also, Auth uses the given Client ID and Client Secret for the app that needs
+// the user information, which are typically obtained through a developer oauth
+// portal (eg: the Credentials section of https://console.developers.google.com/).
+func Auth(ctx context.Context, providerName, providerURL, clientID, clientSecret string) (*oauth2.Token, *oidc.UserInfo, error) {
 	provider, err := oidc.NewProvider(ctx, providerURL)
 	if err != nil {
 		return nil, nil, err
