@@ -37,7 +37,6 @@ func Auth(ctx context.Context, providerName, providerURL, clientID, clientSecret
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
-	fmt.Println(config)
 
 	b := make([]byte, 16)
 	rand.Read(b)

@@ -19,8 +19,10 @@ func main() { gimain.Run(app) }
 func app() {
 	sc := gi.NewScene("kid-basic").SetTitle("Kid Basic Example")
 	kid.Buttons(sc, func(token *oauth2.Token, userInfo *oidc.UserInfo) {
-		d := gi.NewDialog(sc).Title("User info:").FullWindow(true)
+		d := gi.NewDialog(sc).Title("User info").FullWindow(true)
+		gi.NewLabel(d).SetType(gi.LabelHeadlineMedium).SetText("Basic info")
 		giv.NewStructView(d).SetStruct(userInfo)
+		gi.NewLabel(d).SetType(gi.LabelHeadlineMedium).SetText("Detailed info")
 		claims := map[string]any{}
 		grr.Log0(userInfo.Claims(&claims))
 		giv.NewMapView(d).SetMap(&claims)
