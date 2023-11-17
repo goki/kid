@@ -9,6 +9,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/grr"
 	"goki.dev/kid"
 	"golang.org/x/oauth2"
 )
@@ -20,6 +21,9 @@ func app() {
 	kid.Buttons(sc, func(token *oauth2.Token, userInfo *oidc.UserInfo) {
 		d := gi.NewDialog(sc).Title("User info:").FullWindow(true)
 		giv.NewStructView(d).SetStruct(userInfo)
+		claims := map[string]any{}
+		grr.Log0(userInfo.Claims(&claims))
+		giv.NewMapView(d).SetMap(&claims)
 		d.Ok().Run()
 	})
 	gi.NewWindow(sc).Run().Wait()
