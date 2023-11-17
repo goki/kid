@@ -16,10 +16,11 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// Auth authenticates the user with the given platform and returns the
-// resulting oauth token and user info.
-func Auth(ctx context.Context, issuerName string, issuerURL string) (*oauth2.Token, *oidc.UserInfo, error) {
-	provider, err := oidc.NewProvider(ctx, issuerURL)
+// Auth authenticates the user with the given provider and returns the
+// resulting oauth token and user info. The provider is specified in terms
+// of its name (eg: "google") and its URL (eg: "https://accounts.google.com").
+func Auth(ctx context.Context, providerName string, providerURL string) (*oauth2.Token, *oidc.UserInfo, error) {
+	provider, err := oidc.NewProvider(ctx, providerURL)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -27,7 +28,7 @@ func Auth(ctx context.Context, issuerName string, issuerURL string) (*oauth2.Tok
 	config := oauth2.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
-		RedirectURL:  "http://127.0.0.1:5556/auth/" + issuerName + "/callback",
+		RedirectURL:  "http://127.0.0.1:5556/auth/" + providerName + "/callback",
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
@@ -40,7 +41,7 @@ func Auth(ctx context.Context, issuerName string, issuerURL string) (*oauth2.Tok
 	code := make(chan string)
 
 	sm := http.NewServeMux()
-	sm.HandleFunc("/auth/"+issuerName+"/callback", func(w http.ResponseWriter, r *http.Request) {
+	sm.HandleFunc("/auth/"+providerName+"/callback", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Query().Get("state") != state {
 			http.Error(w, "state did not match", http.StatusBadRequest)
 			return
