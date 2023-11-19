@@ -15,7 +15,6 @@ import (
 	"goki.dev/girl/styles"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
-	"goki.dev/mat32/v2"
 	"golang.org/x/oauth2"
 )
 
@@ -32,7 +31,7 @@ func init() {
 func Buttons(par gi.Widget, fun func(token *oauth2.Token, userInfo *oidc.UserInfo)) *gi.Layout {
 	ly := gi.NewLayout(par, "auth-buttons")
 	ly.Style(func(s *styles.Style) {
-		s.MainAxis = mat32.Y
+		s.Direction = styles.Column
 	})
 	GoogleButton(ly, fun)
 	return ly
