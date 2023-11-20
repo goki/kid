@@ -48,7 +48,7 @@ func GoogleButton(par gi.Widget, fun func(token *oauth2.Token, userInfo *oidc.Us
 	bt.OnClick(func(e events.Event) {
 		token, userInfo, err := Google(context.TODO())
 		if err != nil {
-			gi.NewDialog(par).Title("Error signing in with Google").Prompt(err.Error())
+			gi.ErrorDialog(par, err)
 		}
 		fun(token, userInfo)
 	})
