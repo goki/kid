@@ -25,7 +25,9 @@ import (
 // Also, Auth uses the given Client ID and Client Secret for the app that needs
 // the user information, which are typically obtained through a developer oauth
 // portal (eg: the Credentials section of https://console.developers.google.com/).
-func Auth(ctx context.Context, providerName, providerURL, clientID, clientSecret string) (*oauth2.Token, *oidc.UserInfo, error) {
+// By default, Auth requests the "openid", "profile", and "email" scopes, but more
+// scopes can be specified on top of those via the scopes parameter.
+func Auth(ctx context.Context, providerName, providerURL, clientID, clientSecret string, scopes ...string) (*oauth2.Token, *oidc.UserInfo, error) {
 	if clientID == "" || clientSecret == "" {
 		slog.Warn("got empty client id or client secret; do you need to set env variables?")
 	}
@@ -40,7 +42,7 @@ func Auth(ctx context.Context, providerName, providerURL, clientID, clientSecret
 		ClientSecret: clientSecret,
 		RedirectURL:  "http://127.0.0.1:5556/auth/" + providerName + "/callback",
 		Endpoint:     provider.Endpoint(),
-		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
+		Scopes:       append([]string{oidc.ScopeOpenID, "profile", "email"}, scopes...),
 	}
 
 	b := make([]byte, 16)

@@ -12,8 +12,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// Google authenticates the user with Google and returns the
+// Google authenticates the user with Google using [Auth] and returns the
 // resulting oauth token and user info.
-func Google(ctx context.Context) (*oauth2.Token, *oidc.UserInfo, error) {
-	return Auth(ctx, "google", "https://accounts.google.com", os.Getenv("GOOGLE_OAUTH2_CLIENT_ID"), os.Getenv("GOOGLE_OAUTH2_CLIENT_SECRET"))
+func Google(ctx context.Context, scopes ...string) (*oauth2.Token, *oidc.UserInfo, error) {
+	return Auth(ctx, "google", "https://accounts.google.com", os.Getenv("GOOGLE_OAUTH2_CLIENT_ID"), os.Getenv("GOOGLE_OAUTH2_CLIENT_SECRET"), scopes...)
 }
