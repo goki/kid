@@ -79,7 +79,7 @@ func GoogleButton(par gi.Widget, fun func(token *oauth2.Token, userInfo *oidc.Us
 	bt.OnClick(func(e events.Event) {
 		token, userInfo, err := Google(context.TODO(), tokenFile, scopes...)
 		if err != nil {
-			gi.ErrorDialog(par, err, "Error signing in with Google")
+			gi.ErrorDialog(par, err, "Error signing in with Google").Run()
 			return
 		}
 		fun(token, userInfo)
