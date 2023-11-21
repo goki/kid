@@ -50,17 +50,17 @@ func Auth(ctx context.Context, providerName, providerURL, clientID, clientSecret
 		Scopes:       append([]string{oidc.ScopeOpenID, "profile", "email"}, scopes...),
 	}
 
-	var oauth2Token *oauth2.Token
+	var token *oauth2.Token
 
 	if tokenFile != "" {
-		err := jsons.Open(&oauth2Token, tokenFile)
+		err := jsons.Open(&token, tokenFile)
 		if err != nil && !errors.Is(err, fs.ErrNotExist) {
 			return nil, nil, err
 		}
 	}
 
 	// if we didn't get it through remember me, we have to get it manually
-	if oauth2Token == nil {
+	if token == nil {
 		b := make([]byte, 16)
 		rand.Read(b)
 		state := base64.RawURLEncoding.EncodeToString(b)
@@ -83,22 +83,38 @@ func Auth(ctx context.Context, providerName, providerURL, clientID, clientSecret
 
 		cs := <-code
 
-		oauth2Token, err = config.Exchange(ctx, cs)
+		token, err = config.Exchange(ctx, cs)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to exchange token: %w", err)
 		}
 		if tokenFile != "" {
 			// TODO(kai/kid): more secure saving of token file
-			err := jsons.Save(oauth2Token, tokenFile)
+			err := jsons.Save(token, tokenFile)
 			if err != nil {
 				return nil, nil, err
 			}
 		}
 	}
 
-	userInfo, err := provider.UserInfo(ctx, oauth2.StaticTokenSource(oauth2Token))
+	tokenSource := config.TokenSource(ctx, token)
+	// the access token could have changed
+	newToken, err := tokenSource.Token()
 	if err != nil {
-		return oauth2Token, nil, fmt.Errorf("failed to get user info: %w", err)
+		return nil, nil, err
 	}
-	return oauth2Token, userInfo, nil
+
+	// if the access token changed, we have to save it again
+	if newToken.AccessToken != token.AccessToken && tokenFile != "" {
+		// TODO(kai/kid): more secure saving of token file
+		err := jsons.Save(newToken, tokenFile)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	userInfo, err := provider.UserInfo(ctx, tokenSource)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get user info: %w", err)
+	}
+	return newToken, userInfo, nil
 }
