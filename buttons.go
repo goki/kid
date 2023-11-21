@@ -13,6 +13,7 @@ import (
 	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
+	"goki.dev/glop/dirs"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"golang.org/x/oauth2"
@@ -76,13 +77,29 @@ func GoogleButton(par gi.Widget, fun func(token *oauth2.Token, userInfo *oidc.Us
 	bt.Style(func(s *styles.Style) {
 		s.Color = colors.Scheme.OnSurface
 	})
-	bt.OnClick(func(e events.Event) {
+
+	auth := func() {
 		token, userInfo, err := Google(context.TODO(), tokenFile, scopes...)
 		if err != nil {
-			gi.ErrorDialog(par, err, "Error signing in with Google").Run()
+			gi.ErrorDialog(bt, err, "Error signing in with Google").Run()
 			return
 		}
 		fun(token, userInfo)
+	}
+	bt.OnClick(func(e events.Event) {
+		auth()
 	})
+
+	// if we have a valid token file, we auth immediately without the user clicking on the button
+	if tokenFile != "" {
+		exists, err := dirs.FileExists(tokenFile)
+		if err != nil {
+			gi.ErrorDialog(bt, err, "Error searching for saved Google auth token file").Run()
+			return bt
+		}
+		if exists {
+			auth()
+		}
+	}
 	return bt
 }
