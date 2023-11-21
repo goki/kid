@@ -80,6 +80,7 @@ func GoogleButton(par gi.Widget, fun func(token *oauth2.Token, userInfo *oidc.Us
 		token, userInfo, err := Google(context.TODO(), tokenFile, scopes...)
 		if err != nil {
 			gi.ErrorDialog(par, err, "Error signing in with Google")
+			return
 		}
 		fun(token, userInfo)
 	})
