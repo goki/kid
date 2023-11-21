@@ -25,17 +25,45 @@ func init() {
 	icons.Icons = merged_fs.NewMergedFS(icons.Icons, providerIcons)
 }
 
+// ButtonsConfig is the configuration information passed to [Buttons].
+type ButtonsConfig struct {
+	// SuccessFunc, if non-nil, is the function called after the user successfully
+	// authenticates. It is passed the user's authentication token and info.
+	SuccessFunc func(token *oauth2.Token, userInfo *oidc.UserInfo)
+
+	// TokenFile, if non-nil, is the function used to determine what token file is
+	// passed to [Auth]. It is passed the provider being used (eg: "google").
+	TokenFile func(provider string) string
+
+	// Scopes, if non-nil, is a map of scopes to pass to [Auth], keyed by the
+	// provider being used (eg: "google").
+	Scopes map[string][]string
+}
+
 // Buttons adds a new vertical layout to the given parent with authentication
-// buttons for major platforms. It calls the given function with the resulting
-// oauth token and user info when the user successfully authenticates. It calls
-// [Auth] with the token file returned by the given function that is passed the
-// provider being used (eg: google) and the scopes keyed by the provider in the given map.
-func Buttons(par gi.Widget, fun func(token *oauth2.Token, userInfo *oidc.UserInfo), tokenFile func(provider string) string, scopes map[string][]string) *gi.Layout {
+// buttons for major platforms, using the given configuration options. See
+// [ButtonsConfig] for more information on the configuration options. The
+// configuration options can be nil, in which case default values will be used.
+func Buttons(par gi.Widget, c *ButtonsConfig) *gi.Layout {
 	ly := gi.NewLayout(par, "auth-buttons")
 	ly.Style(func(s *styles.Style) {
 		s.Direction = styles.Column
 	})
-	GoogleButton(ly, fun, tokenFile("google"), scopes["google"]...)
+
+	if c == nil {
+		c = &ButtonsConfig{}
+	}
+	if c.SuccessFunc == nil {
+		c.SuccessFunc = func(token *oauth2.Token, userInfo *oidc.UserInfo) {}
+	}
+	if c.TokenFile == nil {
+		c.TokenFile = func(provider string) string { return "" }
+	}
+	if c.Scopes == nil {
+		c.Scopes = map[string][]string{}
+	}
+
+	GoogleButton(ly, c.SuccessFunc, c.TokenFile("google"), c.Scopes["google"]...)
 	return ly
 }
 

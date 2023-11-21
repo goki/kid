@@ -28,7 +28,7 @@ import (
 // Also, Auth uses the given Client ID and Client Secret for the app that needs
 // the user information, which are typically obtained through a developer oauth
 // portal (eg: the Credentials section of https://console.developers.google.com/).
-// If the given token file is not "", Auth also saves the token to the file and
+// If the given token file is not "", Auth also saves the token to the file as JSON and
 // skips the user-facing authentication step if it finds a valid token at the file
 // (ie: remember me). By default, Auth requests the "openid", "profile", and "email"
 // scopes, but more scopes can be specified on top of those via the scopes parameter.

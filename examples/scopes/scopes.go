@@ -5,10 +5,13 @@
 package main
 
 import (
+	"path/filepath"
+
 	"github.com/coreos/go-oidc/v3/oidc"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
+	"goki.dev/goosi"
 	"goki.dev/grr"
 	"goki.dev/kid"
 	"golang.org/x/oauth2"
@@ -18,7 +21,7 @@ func main() { gimain.Run(app) }
 
 func app() {
 	gi.SetAppName("kid-scopes")
-	b := gi.NewBody().SetTitle("Kid Scopes Example")
+	b := gi.NewBody().SetTitle("Kid Scopes and Token File Example")
 	fun := func(token *oauth2.Token, userInfo *oidc.UserInfo) {
 		d := gi.NewBody().AddTitle("User info")
 		gi.NewLabel(d).SetType(gi.LabelHeadlineMedium).SetText("Basic info")
@@ -32,6 +35,14 @@ func app() {
 		})
 		d.NewFullDialog(b).Run()
 	}
-	kid.Buttons(b, fun, "https://mail.google.com/") // <- this is where the scopes go
+	kid.Buttons(b, &kid.ButtonsConfig{
+		SuccessFunc: fun,
+		TokenFile: func(provider string) string {
+			return filepath.Join(goosi.TheApp.AppPrefsDir(), provider+"-token.json")
+		},
+		Scopes: map[string][]string{
+			"google": {"https://mail.google.com/"},
+		},
+	})
 	b.NewWindow().Run().Wait()
 }
