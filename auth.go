@@ -87,6 +87,12 @@ func Auth(ctx context.Context, providerName, providerURL, clientID, clientSecret
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to exchange token: %w", err)
 		}
+		if tokenFile != "" {
+			err := jsons.Save(oauth2Token, tokenFile)
+			if err != nil {
+				return nil, nil, err
+			}
+		}
 	}
 
 	userInfo, err := provider.UserInfo(ctx, oauth2.StaticTokenSource(oauth2Token))
