@@ -60,7 +60,7 @@ func Auth(ctx context.Context, providerName, providerURL, clientID, clientSecret
 	}
 
 	// if we didn't get it through remember me, we have to get it manually
-	if oauth2Token.AccessToken == "" {
+	if oauth2Token == nil {
 		b := make([]byte, 16)
 		rand.Read(b)
 		state := base64.RawURLEncoding.EncodeToString(b)
