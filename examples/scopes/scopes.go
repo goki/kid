@@ -12,6 +12,7 @@ import (
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
 	"goki.dev/goosi"
+	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/kid"
 	"golang.org/x/oauth2"
@@ -23,17 +24,19 @@ func app() {
 	gi.SetAppName("kid-scopes")
 	b := gi.NewBody().SetTitle("Kid Scopes and Token File Example")
 	fun := func(token *oauth2.Token, userInfo *oidc.UserInfo) {
-		d := gi.NewBody().AddTitle("User info")
-		gi.NewLabel(d).SetType(gi.LabelHeadlineMedium).SetText("Basic info")
-		giv.NewStructView(d).SetStruct(userInfo)
-		gi.NewLabel(d).SetType(gi.LabelHeadlineMedium).SetText("Detailed info")
-		claims := map[string]any{}
-		grr.Log0(userInfo.Claims(&claims))
-		giv.NewMapView(d).SetMap(&claims)
-		d.AddBottomBar(func(pw gi.Widget) {
-			d.AddOk(pw)
+		b.Sc.OnShow(func(e events.Event) {
+			d := gi.NewBody().AddTitle("User info")
+			gi.NewLabel(d).SetType(gi.LabelHeadlineMedium).SetText("Basic info")
+			giv.NewStructView(d).SetStruct(userInfo)
+			gi.NewLabel(d).SetType(gi.LabelHeadlineMedium).SetText("Detailed info")
+			claims := map[string]any{}
+			grr.Log0(userInfo.Claims(&claims))
+			giv.NewMapView(d).SetMap(&claims)
+			d.AddBottomBar(func(pw gi.Widget) {
+				d.AddOk(pw)
+			})
+			d.NewFullDialog(b).Run()
 		})
-		d.NewFullDialog(b).Run()
 	}
 	kid.Buttons(b, &kid.ButtonsConfig{
 		SuccessFunc: fun,
