@@ -88,6 +88,7 @@ func Auth(ctx context.Context, providerName, providerURL, clientID, clientSecret
 			return nil, nil, fmt.Errorf("failed to exchange token: %w", err)
 		}
 		if tokenFile != "" {
+			// TODO(kai/kid): more secure saving of token file
 			err := jsons.Save(oauth2Token, tokenFile)
 			if err != nil {
 				return nil, nil, err
