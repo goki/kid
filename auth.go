@@ -54,7 +54,7 @@ func Auth(ctx context.Context, providerName, providerURL, clientID, clientSecret
 
 	if tokenFile != "" {
 		err := jsons.Open(&oauth2Token, tokenFile)
-		if !errors.Is(err, fs.ErrNotExist) {
+		if err != nil && !errors.Is(err, fs.ErrNotExist) {
 			return nil, nil, err
 		}
 	}
