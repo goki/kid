@@ -9,6 +9,7 @@ require (
 	goki.dev/gi/v2 v2.0.0-dev0.0.13
 	goki.dev/girl v0.0.21
 	goki.dev/goosi v0.0.11
+	goki.dev/grows v0.3.15
 	goki.dev/grr v0.0.6
 	goki.dev/icons v0.0.9
 	golang.org/x/oauth2 v0.14.0
@@ -53,7 +54,6 @@ require (
 	goki.dev/enums v0.9.38 // indirect
 	goki.dev/glop v0.1.4 // indirect
 	goki.dev/grog v0.0.13 // indirect
-	goki.dev/grows v0.3.15 // indirect
 	goki.dev/gti v0.1.16 // indirect
 	goki.dev/ki/v2 v2.0.0-dev0.0.19 // indirect
 	goki.dev/laser v0.1.18 // indirect

@@ -10,12 +10,15 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"net/http"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"goki.dev/goosi"
+	"goki.dev/grows/jsons"
 	"golang.org/x/oauth2"
 )
 
@@ -25,9 +28,11 @@ import (
 // Also, Auth uses the given Client ID and Client Secret for the app that needs
 // the user information, which are typically obtained through a developer oauth
 // portal (eg: the Credentials section of https://console.developers.google.com/).
-// By default, Auth requests the "openid", "profile", and "email" scopes, but more
-// scopes can be specified on top of those via the scopes parameter.
-func Auth(ctx context.Context, providerName, providerURL, clientID, clientSecret string, scopes ...string) (*oauth2.Token, *oidc.UserInfo, error) {
+// If the given token file is not "", Auth also saves the token to the file and
+// skips the user-facing authentication step if it finds a valid token at the file
+// (ie: remember me). By default, Auth requests the "openid", "profile", and "email"
+// scopes, but more scopes can be specified on top of those via the scopes parameter.
+func Auth(ctx context.Context, providerName, providerURL, clientID, clientSecret string, tokenFile string, scopes ...string) (*oauth2.Token, *oidc.UserInfo, error) {
 	if clientID == "" || clientSecret == "" {
 		slog.Warn("got empty client id or client secret; do you need to set env variables?")
 	}
@@ -45,32 +50,45 @@ func Auth(ctx context.Context, providerName, providerURL, clientID, clientSecret
 		Scopes:       append([]string{oidc.ScopeOpenID, "profile", "email"}, scopes...),
 	}
 
-	b := make([]byte, 16)
-	rand.Read(b)
-	state := base64.RawURLEncoding.EncodeToString(b)
+	var oauth2Token *oauth2.Token
 
-	code := make(chan string)
-
-	sm := http.NewServeMux()
-	sm.HandleFunc("/auth/"+providerName+"/callback", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Query().Get("state") != state {
-			http.Error(w, "state did not match", http.StatusBadRequest)
-			return
+	if tokenFile != "" {
+		err := jsons.Open(&oauth2Token, tokenFile)
+		if !errors.Is(err, fs.ErrNotExist) {
+			return nil, nil, err
 		}
-		code <- r.URL.Query().Get("code")
-		w.Write([]byte("<h1>Signed in</h1><p>You can return to the app</p>"))
-	})
-	// TODO(kai/auth): more graceful closing / error handling
-	go http.ListenAndServe("127.0.0.1:5556", sm)
-
-	goosi.TheApp.OpenURL(config.AuthCodeURL(state))
-
-	cs := <-code
-
-	oauth2Token, err := config.Exchange(ctx, cs)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to exchange token: %w", err)
 	}
+
+	// if we didn't get it through remember me, we have to get it manually
+	if oauth2Token.AccessToken == "" {
+		b := make([]byte, 16)
+		rand.Read(b)
+		state := base64.RawURLEncoding.EncodeToString(b)
+
+		code := make(chan string)
+
+		sm := http.NewServeMux()
+		sm.HandleFunc("/auth/"+providerName+"/callback", func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Query().Get("state") != state {
+				http.Error(w, "state did not match", http.StatusBadRequest)
+				return
+			}
+			code <- r.URL.Query().Get("code")
+			w.Write([]byte("<h1>Signed in</h1><p>You can return to the app</p>"))
+		})
+		// TODO(kai/auth): more graceful closing / error handling
+		go http.ListenAndServe("127.0.0.1:5556", sm)
+
+		goosi.TheApp.OpenURL(config.AuthCodeURL(state))
+
+		cs := <-code
+
+		oauth2Token, err = config.Exchange(ctx, cs)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to exchange token: %w", err)
+		}
+	}
+
 	userInfo, err := provider.UserInfo(ctx, oauth2.StaticTokenSource(oauth2Token))
 	if err != nil {
 		return oauth2Token, nil, fmt.Errorf("failed to get user info: %w", err)
