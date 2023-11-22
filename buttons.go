@@ -99,7 +99,7 @@ func GoogleButton(par gi.Widget, fun func(token *oauth2.Token, userInfo *oidc.Us
 		}
 		if exists {
 			// have to wait until the scene is shown in case any dialogs are created
-			bt.Sc.OnShow(func(e events.Event) {
+			bt.OnShow(func(e events.Event) {
 				auth()
 			})
 		}
