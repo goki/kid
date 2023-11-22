@@ -15,6 +15,8 @@ import (
 	"io/fs"
 	"log/slog"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"goki.dev/goosi"
@@ -88,8 +90,12 @@ func Auth(ctx context.Context, providerName, providerURL, clientID, clientSecret
 			return nil, nil, fmt.Errorf("failed to exchange token: %w", err)
 		}
 		if tokenFile != "" {
+			err := os.MkdirAll(filepath.Dir(tokenFile), 0750)
+			if err != nil {
+				return nil, nil, err
+			}
 			// TODO(kai/kid): more secure saving of token file
-			err := jsons.Save(token, tokenFile)
+			err = jsons.Save(token, tokenFile)
 			if err != nil {
 				return nil, nil, err
 			}
