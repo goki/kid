@@ -11,7 +11,6 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/gi/v2/gimain"
 	"goki.dev/gi/v2/giv"
-	"goki.dev/goosi"
 	"goki.dev/grr"
 	"goki.dev/kid"
 	"golang.org/x/oauth2"
@@ -39,7 +38,7 @@ func app() {
 	kid.Buttons(b, &kid.ButtonsConfig{
 		SuccessFunc: fun,
 		TokenFile: func(provider string) string {
-			return filepath.Join(goosi.TheApp.AppPrefsDir(), provider+"-token.json")
+			return filepath.Join(gi.AppPrefsDir(), provider+"-token.json")
 		},
 		Scopes: map[string][]string{
 			"google": {"https://mail.google.com/"},
