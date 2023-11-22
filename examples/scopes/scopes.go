@@ -5,7 +5,6 @@
 package main
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -25,9 +24,7 @@ func app() {
 	gi.SetAppName("kid-scopes")
 	b := gi.NewBody().SetTitle("Kid Scopes and Token File Example")
 	fun := func(token *oauth2.Token, userInfo *oidc.UserInfo) {
-		fmt.Println("f")
 		b.Sc.OnShow(func(e events.Event) {
-			fmt.Println("os")
 			d := gi.NewBody().AddTitle("User info")
 			gi.NewLabel(d).SetType(gi.LabelHeadlineMedium).SetText("Basic info")
 			giv.NewStructView(d).SetStruct(userInfo)
@@ -39,7 +36,6 @@ func app() {
 				d.AddOk(pw)
 			})
 			ds := d.NewFullDialog(b)
-			fmt.Println("r")
 			ds.Run()
 		})
 	}
