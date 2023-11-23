@@ -10,10 +10,10 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/yalue/merged_fs"
-	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/glop/dirs"
+	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
 	"goki.dev/icons"
 	"golang.org/x/oauth2"
@@ -32,10 +32,13 @@ type ButtonsConfig struct {
 	// authenticates. It is passed the user's authentication token and info.
 	SuccessFunc func(token *oauth2.Token, userInfo *oidc.UserInfo)
 
-	// TokenFile, if non-nil, is the function used to determine what token file is
-	// passed to [Auth]. It is passed the provider being used (eg: "google") and the
+	// TokenFile, if non-nil, is the function used to determine what token file function is
+	// used for [AuthConfig.TokenFile]. It is passed the provider being used (eg: "google") and the
 	// email address of the user authenticating.
 	TokenFile func(provider string, email string) string
+
+	// Accounts are optional accounts to check for the remember me feature described in [AuthConfig.TokenFile]
+	Accounts []string
 
 	// Scopes, if non-nil, is a map of scopes to pass to [Auth], keyed by the
 	// provider being used (eg: "google").
@@ -52,58 +55,81 @@ func Buttons(par gi.Widget, c *ButtonsConfig) *gi.Layout {
 		s.Direction = styles.Column
 	})
 
+	GoogleButton(ly, c)
+	return ly
+}
+
+// Button makes a new button for signing in with the provider
+// that has the given name and auth func. It should not typically
+// be used by end users; instead, use [Buttons] or the platform-specific
+// functions (eg: [Google]). The configuration options can be nil, in
+// which case default values will be used.
+func Button(par gi.Widget, c *ButtonsConfig, provider string, authFunc func(c *AuthConfig) (*oauth2.Token, *oidc.UserInfo, error)) *gi.Button {
 	if c == nil {
 		c = &ButtonsConfig{}
 	}
 	if c.SuccessFunc == nil {
 		c.SuccessFunc = func(token *oauth2.Token, userInfo *oidc.UserInfo) {}
 	}
-	if c.TokenFile == nil {
-		c.TokenFile = func(provider string, email string) string { return "" }
-	}
 	if c.Scopes == nil {
 		c.Scopes = map[string][]string{}
 	}
 
-	GoogleButton(ly, c.SuccessFunc, c.TokenFile("google"), c.Scopes["google"]...)
-	return ly
-}
+	bt := gi.NewButton(par).SetText("Sign in")
 
-// GoogleButton adds a new button for signing in with Google.
-// It calls the given function when the token and user info are obtained.
-// See [Auth] for more information about token files and scopes.
-func GoogleButton(par gi.Widget, fun func(token *oauth2.Token, userInfo *oidc.UserInfo), tokenFile string, scopes ...string) *gi.Button {
-	bt := gi.NewButton(par, "sign-in-with-google").SetType(gi.ButtonOutlined).
-		SetText("Sign in with Google").SetIcon("sign-in-with-google")
-	bt.Style(func(s *styles.Style) {
-		s.Color = colors.Scheme.OnSurface
-	})
+	tf := func(email string) string {
+		if c.TokenFile != nil {
+			return c.TokenFile(provider, email)
+		}
+		return ""
+	}
+	ac := &AuthConfig{
+		Ctx:          context.TODO(),
+		ProviderName: provider,
+		TokenFile:    tf,
+		Accounts:     c.Accounts,
+		Scopes:       c.Scopes[provider],
+	}
 
 	auth := func() {
-		token, userInfo, err := Google(context.TODO(), tokenFile, scopes...)
+		token, userInfo, err := authFunc(ac)
 		if err != nil {
-			gi.ErrorDialog(bt, err, "Error signing in with Google").Run()
+			gi.ErrorDialog(bt, err, "Error signing in with "+sentencecase.Of(provider)).Run()
 			return
 		}
-		fun(token, userInfo)
+		c.SuccessFunc(token, userInfo)
 	}
 	bt.OnClick(func(e events.Event) {
 		auth()
 	})
 
 	// if we have a valid token file, we auth immediately without the user clicking on the button
-	if tokenFile != "" {
-		exists, err := dirs.FileExists(tokenFile)
-		if err != nil {
-			gi.ErrorDialog(bt, err, "Error searching for saved Google auth token file").Run()
-			return bt
-		}
-		if exists {
-			// have to wait until the scene is shown in case any dialogs are created
-			bt.OnShow(func(e events.Event) {
-				auth()
-			})
+	if c.TokenFile != nil {
+		for _, account := range c.Accounts {
+			tf := c.TokenFile(provider, account)
+			if tf != "" {
+				exists, err := dirs.FileExists(tf)
+				if err != nil {
+					gi.ErrorDialog(bt, err, "Error searching for saved "+sentencecase.Of(provider)+" auth token file").Run()
+					return bt
+				}
+				if exists {
+					// have to wait until the scene is shown in case any dialogs are created
+					bt.OnShow(func(e events.Event) {
+						auth()
+					})
+				}
+			}
 		}
 	}
+	return bt
+}
+
+// GoogleButton adds a new button for signing in with Google
+// to the given parent using the given configuration information.
+func GoogleButton(par gi.Widget, c *ButtonsConfig) *gi.Button {
+	bt := Button(par, c, "google", Google).SetType(gi.ButtonOutlined).
+		SetText("Sign in with Google").SetIcon("sign-in-with-google")
+	bt.SetName("sign-in-with-google")
 	return bt
 }
