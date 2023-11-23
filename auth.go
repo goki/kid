@@ -144,7 +144,7 @@ func Auth(c *AuthConfig) (*oauth2.Token, *oidc.UserInfo, error) {
 	if c.TokenFile != nil {
 		tf := c.TokenFile(userInfo.Email)
 		if tf != "" {
-			err := os.MkdirAll(filepath.Dir(tf), 0750)
+			err := os.MkdirAll(filepath.Dir(tf), 0700)
 			if err != nil {
 				return nil, nil, err
 			}
