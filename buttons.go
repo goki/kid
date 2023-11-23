@@ -33,8 +33,9 @@ type ButtonsConfig struct {
 	SuccessFunc func(token *oauth2.Token, userInfo *oidc.UserInfo)
 
 	// TokenFile, if non-nil, is the function used to determine what token file is
-	// passed to [Auth]. It is passed the provider being used (eg: "google").
-	TokenFile func(provider string) string
+	// passed to [Auth]. It is passed the provider being used (eg: "google") and the
+	// email address of the user authenticating.
+	TokenFile func(provider string, email string) string
 
 	// Scopes, if non-nil, is a map of scopes to pass to [Auth], keyed by the
 	// provider being used (eg: "google").
@@ -58,7 +59,7 @@ func Buttons(par gi.Widget, c *ButtonsConfig) *gi.Layout {
 		c.SuccessFunc = func(token *oauth2.Token, userInfo *oidc.UserInfo) {}
 	}
 	if c.TokenFile == nil {
-		c.TokenFile = func(provider string) string { return "" }
+		c.TokenFile = func(provider string, email string) string { return "" }
 	}
 	if c.Scopes == nil {
 		c.Scopes = map[string][]string{}
