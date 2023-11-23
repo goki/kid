@@ -56,16 +56,9 @@ type AuthConfig struct {
 	Scopes []string
 }
 
-// Auth authenticates the user with the given provider and returns the
-// resulting oauth token and user info. The provider is specified in terms
-// of its name (eg: "google") and its URL (eg: "https://accounts.google.com").
-// Also, Auth uses the given Client ID and Client Secret for the app that needs
-// the user information, which are typically obtained through a developer oauth
-// portal (eg: the Credentials section of https://console.developers.google.com/).
-// If the given token file is not "", Auth also saves the token to the file as JSON and
-// skips the user-facing authentication step if it finds a valid token at the file
-// (ie: remember me). By default, Auth requests the "openid", "profile", and "email"
-// scopes, but more scopes can be specified on top of those via the scopes parameter.
+// Auth authenticates the user using the given configuration information and returns the
+// resulting oauth token and user info. See [AuthConfig] for more information on the
+// configuration options.
 func Auth(c *AuthConfig) (*oauth2.Token, *oidc.UserInfo, error) {
 	if c.Ctx == nil {
 		c.Ctx = context.TODO()
