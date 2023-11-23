@@ -5,6 +5,7 @@ go 1.21.0
 require (
 	github.com/coreos/go-oidc/v3 v3.7.0
 	github.com/yalue/merged_fs v1.2.3
+	goki.dev/colors v0.8.29
 	goki.dev/gi/v2 v2.0.0-dev0.0.13
 	goki.dev/girl v0.0.21
 	goki.dev/glop v0.1.4
@@ -50,7 +51,6 @@ require (
 	github.com/srwiley/rasterx v0.0.0-20220730225603-2ab79fcdd4ef // indirect
 	github.com/srwiley/scanx v0.0.0-20190309010443-e94503791388 // indirect
 	goki.dev/cam v0.9.35 // indirect
-	goki.dev/colors v0.8.29 // indirect
 	goki.dev/cursors v0.0.17 // indirect
 	goki.dev/enums v0.9.38 // indirect
 	goki.dev/grog v0.0.13 // indirect

@@ -37,7 +37,7 @@ func app() {
 	}
 	kid.Buttons(b, &kid.ButtonsConfig{
 		SuccessFunc: fun,
-		TokenFile: func(provider string) string {
+		TokenFile: func(provider, email string) string {
 			return filepath.Join(gi.AppPrefsDir(), provider+"-token.json")
 		},
 		Scopes: map[string][]string{

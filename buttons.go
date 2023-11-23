@@ -10,6 +10,7 @@ import (
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/yalue/merged_fs"
+	"goki.dev/colors"
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/glop/dirs"
@@ -35,7 +36,7 @@ type ButtonsConfig struct {
 	// TokenFile, if non-nil, is the function used to determine what token file function is
 	// used for [AuthConfig.TokenFile]. It is passed the provider being used (eg: "google") and the
 	// email address of the user authenticating.
-	TokenFile func(provider string, email string) string
+	TokenFile func(provider, email string) string
 
 	// Accounts are optional accounts to check for the remember me feature described in [AuthConfig.TokenFile]
 	Accounts []string
@@ -131,5 +132,8 @@ func GoogleButton(par gi.Widget, c *ButtonsConfig) *gi.Button {
 	bt := Button(par, c, "google", Google).SetType(gi.ButtonOutlined).
 		SetText("Sign in with Google").SetIcon("sign-in-with-google")
 	bt.SetName("sign-in-with-google")
+	bt.Style(func(s *styles.Style) {
+		s.Color = colors.Scheme.OnSurface
+	})
 	return bt
 }
