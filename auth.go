@@ -46,10 +46,11 @@ type AuthConfig struct {
 	// TokenFile is an optional function that returns the filename at which the token for the given user will be stored as JSON.
 	// If it is nil or it returns "", the token is not stored. Also, if it is non-nil, Auth skips the user-facing authentication
 	// step if it finds a valid token at the file (ie: remember me). It checks all [AuthConfig.Accounts] until it finds one
-	// that works for that step.
+	// that works for that step. If [AuthConfig.Accounts] is nil, it checks with a blank ("") email account.
 	TokenFile func(email string) string
 
-	// Accounts are optional accounts to check for the remember me feature described in [AuthConfig.TokenFile]
+	// Accounts are optional accounts to check for the remember me feature described in [AuthConfig.TokenFile].
+	// If it is nil and TokenFile is not, it defaults to contain one blank ("") element.
 	Accounts []string
 
 	// Scopes are additional scopes to request beyond the default "openid", "profile", and "email" scopes
@@ -83,6 +84,9 @@ func Auth(c *AuthConfig) (*oauth2.Token, *oidc.UserInfo, error) {
 	var token *oauth2.Token
 
 	if c.TokenFile != nil {
+		if c.Accounts == nil {
+			c.Accounts = []string{""}
+		}
 		for _, account := range c.Accounts {
 			tf := c.TokenFile(account)
 			if tf != "" {

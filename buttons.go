@@ -38,7 +38,9 @@ type ButtonsConfig struct {
 	// email address of the user authenticating.
 	TokenFile func(provider, email string) string
 
-	// Accounts are optional accounts to check for the remember me feature described in [AuthConfig.TokenFile]
+	// Accounts are optional accounts to check for the remember me feature described in [AuthConfig.TokenFile].
+	// See [AuthConfig.Accounts] for more information. If it is nil and TokenFile is not, it defaults to contain
+	// one blank ("") element.
 	Accounts []string
 
 	// Scopes, if non-nil, is a map of scopes to pass to [Auth], keyed by the
@@ -106,6 +108,9 @@ func Button(par gi.Widget, c *ButtonsConfig, provider string, authFunc func(c *A
 
 	// if we have a valid token file, we auth immediately without the user clicking on the button
 	if c.TokenFile != nil {
+		if c.Accounts == nil {
+			c.Accounts = []string{""}
+		}
 		for _, account := range c.Accounts {
 			tf := c.TokenFile(provider, account)
 			if tf != "" {

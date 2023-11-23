@@ -22,7 +22,7 @@ func app() {
 	gi.SetAppName("kid-scopes")
 	b := gi.NewBody().SetTitle("Kid Scopes and Token File Example")
 	fun := func(token *oauth2.Token, userInfo *oidc.UserInfo) {
-		d := gi.NewBody().AddTitle("User info")
+		d := gi.NewBody()
 		gi.NewLabel(d).SetType(gi.LabelHeadlineMedium).SetText("Basic info")
 		giv.NewStructView(d).SetStruct(userInfo)
 		gi.NewLabel(d).SetType(gi.LabelHeadlineMedium).SetText("Detailed info")
