@@ -7,6 +7,7 @@ package kid
 import (
 	"context"
 	"embed"
+	"io/fs"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/yalue/merged_fs"
@@ -16,15 +17,16 @@ import (
 	"goki.dev/glop/dirs"
 	"goki.dev/glop/sentencecase"
 	"goki.dev/goosi/events"
+	"goki.dev/grr"
 	"goki.dev/icons"
 	"golang.org/x/oauth2"
 )
 
-//go:embed svg/*.svg
+//go:embed icons/*.svg
 var providerIcons embed.FS
 
 func init() {
-	icons.Icons = merged_fs.NewMergedFS(icons.Icons, providerIcons)
+	icons.Icons = merged_fs.NewMergedFS(icons.Icons, grr.Log(fs.Sub(providerIcons, "icons")))
 }
 
 // ButtonsConfig is the configuration information passed to [Buttons].
