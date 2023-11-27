@@ -27,7 +27,7 @@ func app() {
 		giv.NewStructView(d).SetStruct(userInfo)
 		gi.NewLabel(d).SetType(gi.LabelHeadlineMedium).SetText("Detailed info")
 		claims := map[string]any{}
-		grr.Log0(userInfo.Claims(&claims))
+		grr.Log(userInfo.Claims(&claims))
 		giv.NewMapView(d).SetMap(&claims)
 		d.AddBottomBar(func(pw gi.Widget) {
 			d.AddOk(pw)

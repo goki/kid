@@ -26,7 +26,7 @@ import (
 var providerIcons embed.FS
 
 func init() {
-	icons.Icons = merged_fs.NewMergedFS(icons.Icons, grr.Log(fs.Sub(providerIcons, "icons")))
+	icons.Icons = merged_fs.NewMergedFS(icons.Icons, grr.Log1(fs.Sub(providerIcons, "icons")))
 }
 
 // ButtonsConfig is the configuration information passed to [Buttons].
