@@ -99,7 +99,7 @@ func Button(par gi.Widget, c *ButtonsConfig, provider string, authFunc func(c *A
 	auth := func() {
 		token, userInfo, err := authFunc(ac)
 		if err != nil {
-			gi.ErrorDialog(bt, err, "Error signing in with "+sentencecase.Of(provider)).Run()
+			gi.ErrorDialog(bt, err, "Error signing in with "+sentencecase.Of(provider))
 			return
 		}
 		c.SuccessFunc(token, userInfo)
@@ -118,7 +118,7 @@ func Button(par gi.Widget, c *ButtonsConfig, provider string, authFunc func(c *A
 			if tf != "" {
 				exists, err := dirs.FileExists(tf)
 				if err != nil {
-					gi.ErrorDialog(bt, err, "Error searching for saved "+sentencecase.Of(provider)+" auth token file").Run()
+					gi.ErrorDialog(bt, err, "Error searching for saved "+sentencecase.Of(provider)+" auth token file")
 					return bt
 				}
 				if exists {
