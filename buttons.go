@@ -15,7 +15,7 @@ import (
 	"goki.dev/gi/v2/gi"
 	"goki.dev/girl/styles"
 	"goki.dev/glop/dirs"
-	"goki.dev/glop/sentencecase"
+	"goki.dev/glop/sentence"
 	"goki.dev/goosi/events"
 	"goki.dev/grr"
 	"goki.dev/icons"
@@ -99,7 +99,7 @@ func Button(par gi.Widget, c *ButtonsConfig, provider string, authFunc func(c *A
 	auth := func() {
 		token, userInfo, err := authFunc(ac)
 		if err != nil {
-			gi.ErrorDialog(bt, err, "Error signing in with "+sentencecase.Of(provider))
+			gi.ErrorDialog(bt, err, "Error signing in with "+sentence.Case(provider))
 			return
 		}
 		c.SuccessFunc(token, userInfo)
@@ -118,7 +118,7 @@ func Button(par gi.Widget, c *ButtonsConfig, provider string, authFunc func(c *A
 			if tf != "" {
 				exists, err := dirs.FileExists(tf)
 				if err != nil {
-					gi.ErrorDialog(bt, err, "Error searching for saved "+sentencecase.Of(provider)+" auth token file")
+					gi.ErrorDialog(bt, err, "Error searching for saved "+sentence.Case(provider)+" auth token file")
 					return bt
 				}
 				if exists {
