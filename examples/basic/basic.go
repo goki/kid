@@ -17,8 +17,7 @@ import (
 func main() { gimain.Run(app) }
 
 func app() {
-	gi.SetAppName("kid-basic")
-	b := gi.NewBody().SetTitle("Kid Basic Example")
+	b := gi.NewAppBody("kid-basic").SetTitle("Kid Basic Example")
 	fun := func(token *oauth2.Token, userInfo *oidc.UserInfo) {
 		d := gi.NewBody().AddTitle("User info")
 		gi.NewLabel(d).SetType(gi.LabelHeadlineMedium).SetText("Basic info")

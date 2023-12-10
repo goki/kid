@@ -19,8 +19,7 @@ import (
 func main() { gimain.Run(app) }
 
 func app() {
-	gi.SetAppName("kid-scopes")
-	b := gi.NewBody().SetTitle("Kid Scopes and Token File Example")
+	b := gi.NewAppBody("kid-scopes").SetTitle("Kid Scopes and Token File Example")
 	fun := func(token *oauth2.Token, userInfo *oidc.UserInfo) {
 		d := gi.NewBody()
 		gi.NewLabel(d).SetType(gi.LabelHeadlineMedium).SetText("Basic info")
@@ -38,7 +37,7 @@ func app() {
 	kid.Buttons(b, &kid.ButtonsConfig{
 		SuccessFunc: fun,
 		TokenFile: func(provider, email string) string {
-			return filepath.Join(gi.AppPrefsDir(), provider+"-token.json")
+			return filepath.Join(b.App().DataDir(), provider+"-token.json")
 		},
 		Scopes: map[string][]string{
 			"google": {"https://mail.google.com/"},
